@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CalculatorController as Page;
-
+use App\Http\Controllers\ProcessController as Process;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +21,14 @@ use App\Http\Controllers\CalculatorController as Page;
 
 Route::get('/', [Page::class, 'index']);
 Route::post('calculator', [Page::class, 'calculator']);
+
+
+//CRUD ROUTES
+Route::get('/crud',[Process::class,'index']);
+Route::get('/create',[Process::class,'create']);
+Route::post('/create',[Process::class,'store']);
+Route::get('/edit/{id}',[Process::class,'edit']);
+Route::put('/edit/{id}',[Process::class,'update']);
+Route::delete('/delete/{id}',[Process::class,'destroy']);
+Route::get('/search',[Process::class,'search']);
+Route::post('/upload',[Process::class,'importExcel']);

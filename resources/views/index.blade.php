@@ -9,7 +9,7 @@
 </head>
 
 <body>
-
+@include('layouts.header');
   <div class="card">
     <div class="card-header">
       Form Calculator
