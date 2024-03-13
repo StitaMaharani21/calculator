@@ -11,6 +11,8 @@ class AlterMaterialTable130320240847 extends Migration
      *
      * @return void
      */
+    //ini kalau mislanya mau set dua kolom unik
+    //bisa input partnum A name A atau Partnum A name B
     public function up()
     {
         Schema::table('materials', function (Blueprint $table) {

@@ -7,7 +7,7 @@ use App\Imports\CsvImport;
 use App\Imports\ExcelImport;
 use Illuminate\Http\Request;
 use App\Material;
-use Barryvdh\DomPDF\PDF;
+use Barryvdh\DomPDF\Facade as PDF;
 use Exception;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -168,7 +168,8 @@ class ProcessController extends Controller
         if ($request->has('search')) {
             $data = Material::where('partnum', 'LIKE', '%' . $request->search . '%')->get();
             if ($data->isEmpty()) {
-                return view('display')->with('error', 'No matching records found.');
+                //  return view('display')->with('error', 'No matching records found.');
+                 return redirect()->back()->with('error', 'No matching records found.');
             }
         } else {
             $data = Material::all();
@@ -186,7 +187,7 @@ class ProcessController extends Controller
                 'importFile' => 'required|mimes:xlsx',
             ],
             [
-                'importFile.mimes' => 'File must xlsx'
+                'importFile.mimes' => 'File format must be xlsx'
             ]
 
 
@@ -197,9 +198,10 @@ class ProcessController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-
+        
         
         Excel::import(new ExcelImport, request()->file('importFile'));
+        Session::flash('alert-success', 'Successfully Insert Data');
         return back();
 
 
@@ -212,10 +214,11 @@ class ProcessController extends Controller
 
     // EXPORT PDF
     public function exportPdf(){
-        $material = Material::all();
+        $data = Material::all();
 
-        view()->share('material', $material);
+        view()->share('data', $data);
         $pdf = PDF::loadview('display-pdf');
-        return $pdf->download('report-material-pdf');
+        return $pdf->download('report.pdf');
+        // return $pdf->stream();
     }
 }
