@@ -169,7 +169,7 @@ class ProcessController extends Controller
             $data = Material::where('partnum', 'LIKE', '%' . $request->search . '%')->get();
             if ($data->isEmpty()) {
                 //  return view('display')->with('error', 'No matching records found.');
-                 return redirect()->back()->with('error', 'No matching records found.');
+                return redirect()->back()->with('error', 'No matching records found.');
             }
         } else {
             $data = Material::all();
@@ -181,6 +181,7 @@ class ProcessController extends Controller
     // IMPORT DARI EXCEL KE DATABASE
     public function importExcel(Request $request)
     {
+        // dd(request()->file('importFile'));
         $validator = Validator::make(
             $request->all(),
             [
@@ -198,22 +199,51 @@ class ProcessController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-        
-        
-        Excel::import(new ExcelImport, request()->file('importFile'));
+
+        $file = request()->file('importFile');
+
+        // Extract 'partnum' values from the Excel file
+        $data = Excel::toArray(new ExcelImport, $file);
+        $partnum = collect($data[0])->pluck('partnum')->toArray();
+        // dd($data[0][0]);
+        // Additional validation for duplicate pastnum
+        $duplicate = Material::whereIn('partnum', $partnum)->pluck('partnum')->toArray();
+
+        if (!empty($duplicate)) {
+            $validator->errors()->add('importFile', 'Duplicate partnum found: ' . implode(', ', $duplicate));
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        for ($i = 0; $i <= count($data[0]) - 1; $i++) {
+            //dd($data[0][$i]['partnum']);
+            $material = new Material([
+                'partnum' => $data[0][$i]['partnum'],
+                'name' => $data[0][$i]['name'],
+                'um' => $data[0][$i]['um']
+            ]);
+            $material->save();
+
+        }
+
+
+
+        // Excel::import(new ExcelImport, $file);
+        // Excel::import(new ExcelImport, request()->file('importFile'));
         Session::flash('alert-success', 'Successfully Insert Data');
         return back();
-
-
     }
 
     // EXPORT EXCEL
-    public function exportExcel(){
+    public function exportExcel()
+    {
         return Excel::download(new ExcelExport, 'Material.xlsx');
     }
 
     // EXPORT PDF
-    public function exportPdf(){
+    public function exportPdf()
+    {
         $data = Material::all();
 
         view()->share('data', $data);

@@ -3,15 +3,11 @@
 namespace App\Imports;
 
 use App\Material;
-use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 
-class ExcelImport implements ToModel, WithHeadingRow, WithValidation
+class ExcelImport implements ToModel, WithHeadingRow
 {
 
     use Importable;
@@ -29,12 +25,12 @@ class ExcelImport implements ToModel, WithHeadingRow, WithValidation
         ]);
     }
 
-    public function rules(): array
-    {
-        return [
-            'partnum' => 'required|regex:/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[^\w\d\s]).+$/u|unique:materials',
-            'name' => 'required|regex:/^[a-zA-Z0-9\s]+$/u',
-            'um' => 'required|regex:/^[a-zA-Z0-9\s]+$/u'
-        ];
-    }
+    // public function rules(): array
+    // {
+    //     return [
+    //         'partnum' => 'required|regex:/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[^\w\d\s]).+$/u|unique:materials',
+    //         'name' => 'required|regex:/^[a-zA-Z0-9\s]+$/u',
+    //         'um' => 'required|regex:/^[a-zA-Z0-9\s]+$/u'
+    //     ];
+    // }
 }
