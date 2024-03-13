@@ -19,6 +19,7 @@ use App\Http\Controllers\ProcessController as Process;
 //     return view('index');
 // });
 
+// CALCULATOR ROUTES
 Route::get('/', [Page::class, 'index']);
 Route::post('calculator', [Page::class, 'calculator']);
 
@@ -31,4 +32,10 @@ Route::get('/edit/{id}',[Process::class,'edit']);
 Route::put('/edit/{id}',[Process::class,'update']);
 Route::delete('/delete/{id}',[Process::class,'destroy']);
 Route::get('/search',[Process::class,'search']);
+
+//IMPORT EXPORT ROUTES
 Route::post('/upload',[Process::class,'importExcel']);
+Route::get('/exportexcel',[Process::class,'exportExcel']);
+
+// EXPORT PDF ROUTE
+Route::get('/exportpdf',[Process::class,'exportPdf']);

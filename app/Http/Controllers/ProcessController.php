@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExcelExport;
 use App\Imports\CsvImport;
+use App\Imports\ExcelImport;
 use Illuminate\Http\Request;
 use App\Material;
+use Barryvdh\DomPDF\PDF;
+use Exception;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -108,35 +112,41 @@ class ProcessController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'partnum' => 'required|regex:/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[^\w\d\s]).+$/u',
-                'name' => 'required|regex:/^[a-zA-Z0-9\s]+$/u',
-                'um' => 'required|regex:/^[a-zA-Z0-9\s]+$/u'
-            ],
-            [
-                'partnum.regex' => 'Part Number must be alpha numeric',
-                'name.regex' => 'Name must not contain special characters',
-                'um.regex' => 'UM must not contain special characters',
-            ]
+        try {
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'partnum' => 'required|regex:/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[^\w\d\s]).+$/u',
+                    'name' => 'required|regex:/^[a-zA-Z0-9\s]+$/u',
+                    'um' => 'required|regex:/^[a-zA-Z0-9\s]+$/u'
+                ],
+                [
+                    'partnum.regex' => 'Part Number must be alpha numeric',
+                    'name.regex' => 'Name must not contain special characters',
+                    'um.regex' => 'UM must not contain special characters',
+                ]
 
+            );
 
-        );
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+            $materialData = Material::where('partnum', $request->partnum)->where('id', '!=', $id)->first();
+            if ($materialData != null) {
+                return redirect()->back()->with('error', 'Part Number' . $request->partnum . 'already exists');
+            }
+            $materialData = Material::findOrFail($id);
+            $materialData->partnum = strtoupper(trim($request->partnum));
+            $materialData->name = strtoupper(trim($request->name));
+            $materialData->um = strtoupper(trim($request->um));
+            $materialData->save();
+            Session::flash('alert-success', 'Data Updated Successfully');
+            return redirect('/crud');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Ada sesuatu yang salah');
         }
-
-        $materialData = Material::findOrFail($id);
-        $materialData->partnum = strtoupper(trim($request->partnum));
-        $materialData->name = strtoupper(trim($request->name));
-        $materialData->um = strtoupper(trim($request->um));
-        $materialData->save();
-        Session::flash('alert-success', 'Data Updated Successfully');
-        return redirect('/crud');
     }
 
     /**
@@ -166,15 +176,17 @@ class ProcessController extends Controller
         return view('display', ['materials' => $data]);
     }
 
+
+    // IMPORT DARI EXCEL KE DATABASE
     public function importExcel(Request $request)
     {
         $validator = Validator::make(
             $request->all(),
             [
-                'importFile' => 'required|mimes:xlsx,xls',
+                'importFile' => 'required|mimes:xlsx',
             ],
             [
-                'importFile.mimes' => 'File must xlsx or xls' 
+                'importFile.mimes' => 'File must xlsx'
             ]
 
 
@@ -186,57 +198,22 @@ class ProcessController extends Controller
                 ->withInput();
         }
 
-
-        Excel::import(new CsvImport, request()->file('importFile'));
+        
+        Excel::import(new ExcelImport, request()->file('importFile'));
         return back();
 
-        // $request->validate([
-        //     'importFile' => 'required|mimes:xlsx,xls',
-        // ]);
 
-        // $path = $request->file('importFile')->getRealPath();
+    }
 
+    // EXPORT EXCEL
+    public function exportExcel(){
+        return Excel::download(new ExcelExport, 'Material.xlsx');
+    }
 
-        // $data = Excel::load($path, function ($reader) {
-        // })->get();
+    // EXPORT PDF
+    public function exportPdf(){
+        $material = Material::all();
 
-
-        // if (!empty($data) && $data->count()) {
-        //     foreach ($data->toArray() as $key => $value) {
-        //         if (!empty($value)) {
-        //             foreach ($value as $v) {
-        //                 $insert[] = ['partnum' => $v['partnum'], 'name' => $v['name'], 'um' => $v['um']];
-        //             }
-        //         }
-        //     }
-        //     if (!empty($insert)) {
-        //         Material::insert($insert);
-        //         return back()->with('success', 'Insert Record successfully.');
-        //     }
-        // }
-
-        // return redirect()->back()->with('success', 'Data imported successfully!');
-        // Excel::create('materials',function($excel) use ($data){
-
-
-        // });
-        // $request->validate([
-        //     'importFile' => 'required|mimes:xlsx,xls,csv',
-        // ]);
-
-        // $file = $request->file('importFile');
-        // $fileContents = file($file->getPathname());
-        // // dd($fileContents);
-        // foreach ($fileContents as $row) {
-        //     $data = str_getcsv($row);
-        //     // dd($data);
-        //     Material::create([
-        //     'partnum' => $data[0],
-        //     'name' => $data[1],
-        //     'um' => $data[2]
-        //    ]);
-        // }
-
-        // return redirect()->back()->with('success', 'Data imported successfully!');
+        // $pdf = PDF::loadview()
     }
 }

@@ -27,31 +27,36 @@
                 </div>
             @endif
 
-            {{-- form input data --}}
-            <form action="{{ url('/edit', $materialData->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="mb-3">
-                    <label class="form-label">Past Number</label>
-                    <input type="text" id="partnum" name="partnum" class="form-control"
-                        value="{{ old('partnum', $materialData->partnum) }}">
+            @if (Session::has('error'))
+                <div class="alert alert-danger">
+                    {{session('error')}}
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" id="name" name="name" class="form-control"
-                        value="{{ old('partnum', $materialData->name) }}">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">UM</label>
-                    <input type="text" id="um" name="um" class="form-control"
-                        value="{{ old('partnum', $materialData->um) }}">
-                </div>
-                <button type="submit" class="btn btn-primary" name="btn">Update</button>
-                <a href="{{ url('/crud') }}">
-                    <button type= "button" class="btn btn-warning">Cancel</button>
-                </a>
+            @endif
+                {{-- form input data --}}
+                <form action="{{ url('/edit', $materialData->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="mb-3">
+                        <label class="form-label">Past Number</label>
+                        <input type="text" id="partnum" name="partnum" class="form-control"
+                            value="{{ old('partnum', $materialData->partnum) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="name" name="name" class="form-control"
+                            value="{{ old('partnum', $materialData->name) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">UM</label>
+                        <input type="text" id="um" name="um" class="form-control"
+                            value="{{ old('partnum', $materialData->um) }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary" name="btn">Update</button>
+                    <a href="{{ url('/crud') }}">
+                        <button type= "button" class="btn btn-warning">Cancel</button>
+                    </a>
 
-            </form>
+                </form>
         </div>
     </div>
 

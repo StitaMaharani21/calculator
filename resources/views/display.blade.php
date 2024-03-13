@@ -33,7 +33,13 @@
                 <a href="{{ url('/create') }}">
                     <button class="btn btn-outline-primary" type="button">ADD DATA</button>
                 </a>
-                <button class="btn btn-outline-success" type="button">EXPORT TO EXCEL</button>
+                <a href="{{ url('/exportexcel') }}">
+                    <button class="btn btn-outline-success" type="button">EXPORT TO EXCEL</button>
+                </a>
+                <a href="{{ url('/exportpdf') }}">
+                    <button class="btn btn-outline-danger" type="button">EXPORT TO PDF</button>
+                </a>
+                
                 <!-- Button trigger modal -->
                 <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
                     data-bs-target="#exampleModal">
