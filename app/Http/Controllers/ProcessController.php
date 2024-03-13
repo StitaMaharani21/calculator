@@ -51,14 +51,14 @@ class ProcessController extends Controller
             $request->all(),
             [
                 'partnum' => 'required|regex:/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[^\w\d\s]).+$/u|unique:materials',
-                'name' => 'required|regex:/^[a-zA-Z0-9\s]+$/u|unique:materials',
+                'name' => 'required|regex:/^[a-zA-Z0-9\s]+$/u',
                 'um' => 'required|regex:/^[a-zA-Z0-9\s]+$/u'
             ],
             [
                 'partnum.regex' => 'Part Number must be alpha numeric',
                 'partnum.unique' => 'Part Number already exists',
                 'name.regex' => 'Name must not contain special characters',
-                'name.unique' => 'Name already exists',
+                // 'name.unique' => 'Name already exists',
                 'um.regex' => 'UM must not contain special characters',
             ]
 
@@ -214,6 +214,8 @@ class ProcessController extends Controller
     public function exportPdf(){
         $material = Material::all();
 
-        // $pdf = PDF::loadview()
+        view()->share('material', $material);
+        $pdf = PDF::loadview('display-pdf');
+        return $pdf->download('report-material-pdf');
     }
 }
