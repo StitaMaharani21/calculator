@@ -202,11 +202,10 @@ class ProcessController extends Controller
 
         $file = request()->file('importFile');
 
-        // Extract 'partnum' values from the Excel file
         $data = Excel::toArray(new ExcelImport, $file);
         $partnum = collect($data[0])->pluck('partnum')->toArray();
         // dd($data[0][0]);
-        // Additional validation for duplicate pastnum
+        
         $duplicate = Material::whereIn('partnum', $partnum)->pluck('partnum')->toArray();
 
         if (!empty($duplicate)) {
